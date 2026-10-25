@@ -1,4 +1,4 @@
-// 关于读者自己的两件活：回顾 TA 在一本书里划了什么，以及用 TA 的划线出题考考 TA。都是对话，不写回。
+// 关于读者自己的几件活：回顾 TA 在一本书里划了什么、用 TA 的划线出题考考 TA、用 TA 自己的话起草一篇读后感。都是对话，不写回。
 import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import { chapters, highlights, notes } from "../db/schema.ts";
 import { getBook } from "../domain/books.ts";
@@ -92,6 +92,37 @@ export function quizBrief(db: Conn, bookId: string): Brief {
 - 只用材料里有的内容出题；题目引用原句时用「」，只用材料里的原文。
 - 答得好就具体说好在哪，再补一点 TA 没提到的；答得不对或含糊，指出哪里不对、给一个提示，请 TA 再试一次，第二次仍不对再讲清楚。
 - 三道问完，问 TA 要不要把讲得最清楚的那一条用自己的话存下来：bookside insight new --as me --book ${refOf("book", bookId)} -（落在某条划线上时用 --highlight）。` + spoilerRule(mode.mode, describePosition(db, bookId)),
+    material: lines.join("\n"),
+  };
+}
+
+/** 不同读法的书，写出来的东西叫法不同。 */
+const DRAFT_KIND = { argument: "书评", practice: "实践心得", knowledge: "读书笔记", narrative: "读后感" } as const;
+
+/** 读后感草稿：用读者自己写下的想法、问题里的发言和观点拼成一篇，AI 只排顺序、写过渡。 */
+export function draftBrief(db: Conn, bookId: string, opts: { for?: string } = {}): Brief {
+  const book = getBook(db, bookId);
+  const m = readerMaterial(db, bookId);
+  const said = listQuestions(db, { bookId }).flatMap((q) =>
+    listMessages(db, q.id)
+      .filter((x) => x.speaker === "me")
+      .map((x) => `[${refOf("question", q.id)}] 关于「${q.title}」，读者说：${x.content.slice(0, 400)}`),
+  );
+  const insights = insightsOfBook(db, bookId);
+  const notes = m.lines.filter((l) => l.startsWith("    想法："));
+  if (said.length + insights.length + notes.length === 0) {
+    throw new DomainError("no_basis", `《${book.title}》里你还没写下自己的想法、问题或观点，没有可以拼成文章的话。先聊一聊，或者先说说你读完最想讲的一件事`);
+  }
+  const lines = [...m.lines];
+  if (said.length) lines.push("", "读者在问题线程里说过的话（原话）：", ...said);
+  const kind = DRAFT_KIND[readingModeOf(book).mode];
+  return {
+    task: `用读者自己的话起草一篇《${book.title}》的${kind}`,
+    instructions: `起草一篇${kind}${opts.for ? `，发在${opts.for}` : ""}，篇幅按平台习惯（没说就 600–1000 字）。这是读者的文章，不是你的：
+- 主体用读者自己的话：观点、划线旁的「想法」、问题线程里的发言，原样或只做最小的改动（去口语、补主语）。书里的原文可以引用，用「」并注明出自书中。
+- 你只做三件事：定一个结构和标题、排顺序、写段落之间的过渡句。读者没说过的判断不要替 TA 写；某处缺一句关键的话时，留「【这里你怎么看？】」请 TA 补。
+- 写完在文末另起一段，列出：用到了 TA 的哪几句话（附引用号），以及还缺什么、补上会更好。
+- 直接在对话里给 TA，不用写回。TA 改好后想把其中的结论留下来，按记录规则存成观点（--as me）。`,
     material: lines.join("\n"),
   };
 }

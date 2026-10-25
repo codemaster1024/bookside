@@ -8,10 +8,11 @@
 <p align="center"><b>简体中文</b> · <a href="README.en.md">English</a></p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/bookside"><img alt="npm" src="https://img.shields.io/npm/v/bookside?color=111&label=npm"></a>
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-111"></a>
-  <a href="https://nodejs.org"><img alt="Node.js 24+" src="https://img.shields.io/badge/node-%E2%89%A5%2024-111"></a>
-  <a href="https://agentskills.io"><img alt="Agent Skills: Claude Code, Codex" src="https://img.shields.io/badge/Agent%20Skills-Claude%20Code%20%C2%B7%20Codex-111"></a>
+  <a href="https://www.npmjs.com/package/bookside"><img alt="npm" src="https://img.shields.io/npm/v/bookside?color=cb3837&logo=npm&label=npm"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-2ea44f"></a>
+  <a href="https://nodejs.org"><img alt="Node.js 22+" src="https://img.shields.io/badge/node-%E2%89%A5%2022-5fa04e?logo=nodedotjs&logoColor=white"></a>
+  <a href="https://agentskills.io"><img alt="Agent Skills: Claude Code, Codex" src="https://img.shields.io/badge/Agent%20Skills-Claude%20Code%20%C2%B7%20Codex-d97757?logo=claude&logoColor=white"></a>
+  <a href="https://github.com/codemaster1024/bookside/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/codemaster1024/bookside?style=flat&color=e3b341&logo=github"></a>
 </p>
 
 <p align="center">
@@ -39,9 +40,10 @@
 
 - **先读懂，再想下去。** 一分钟的速览帮你决定读不读、先读哪部分；全书导读和章节导读讲清结构与核心观点，Kindle 里的书也能写。
 - **追问，而不是只给总结。** 新划线会被问一句：你同意吗？和你哪段经历有关？问的是你，不考书的内容。
-- **记住你想继续想的。** 愿意想下去的，记成一个问题；你的原话和 AI 的话分开记，整理出的观点标明是你写的还是 AI 协助的。
+- **记住你想继续想的。** 愿意想下去的，记成一个问题；你的原话和 AI 的话分开记，整理出的观点标明是你写的还是 AI 协助的；想写书评，它也是用你自己的话拼一篇草稿，而不是替你写。
 - **在合适的时候提起，不打扰。** 不发通知、不在后台运行。你来聊书时，它只挑一件最值得聊的：一个到期的问题，或一段刚发现的联系。
 - **让划线不沉底。** 想翻翻旧划线时，它挑几条你一个月前划的，问你现在读来怎么看；还能回顾你在一本书里都关心了什么，或者出几道题考考你。
+- **看见自己在读什么。** 划线攒多了，智能体会替你写一份读书画像：你最近在关心哪几件事、一句值得现在重读的话、下一步可以做什么，引用的每一句都是你划过的原文。隔些日子再写一份，看得出自己的变化。
 - **把不同的书连起来。** 新书里有一段可能回答了你在另一本书里提过的问题，它会指给你看，等你确认。
 - **按书的类型陪你读。** 思辨类追问论证，实践类问"试了吗"，知识类请你讲一遍，小说聊人物和感受，并且不剧透你还没读到的部分。
 - **数据在你手里。** 一个本地文件，随时导出成 Obsidian 能直接打开的 Markdown。书畔本身不调用 AI 模型，思考由你正在用的智能体完成，所以不用另外申请模型的 Key；也不收集任何数据。
@@ -70,11 +72,12 @@
 | 跨越几周、几个月记住你的问题 | | | ✓ |
 | 在新书里找出回答旧问题的段落 | | | ✓ |
 | 按书的类型换问法，小说不剧透 | | | ✓ |
+| 看出你这段时间在关心什么 | | | ✓ |
 | 留下的是你自己的话 | ✓ | | ✓ |
 
 ## 五分钟上手
 
-你需要 [Node.js](https://nodejs.org) 24 或更新的版本，以及一个能加载 skill 的智能体，比如 Claude Code、Codex、Cursor、Trae。
+你需要 [Node.js](https://nodejs.org) 22 或更新的版本，以及一个能加载 skill 的智能体，比如 Claude Code、Codex、Cursor、Trae。
 
 **1. 安装**
 
@@ -82,19 +85,25 @@
 npm install -g bookside
 ```
 
-**2. 先用示例书试一遍**（不需要任何账号或 Key）
+**2. 接上你的书**
 
 ```sh
-bookside init --sample
+bookside init
 ```
 
-这会放入一本示例书——鲁迅的《呐喊》，读到《故乡》为止，带着几条划线、一条追问和一个该再聊聊的问题——并把书畔装进你电脑上的智能体。
+它会问你数据从哪来：
+
+- **微信读书**：在 [weread.qq.com/r/weread-skills](https://weread.qq.com/r/weread-skills) 获取 Key，粘贴进去，它会同步你的书架和划线。
+- **Kindle**：给出 `My Clippings.txt` 的路径（Kindle 接到电脑后，在 `documents` 目录里）。
+- **还没准备好？** 选示例书——鲁迅的《呐喊》，读到《故乡》为止，带着二十来条划线、一条追问和一个该再聊聊的问题，够智能体给你写一份读书画像。之后想换成自己的书，再运行一次 `bookside init` 就行；不要示例书了，运行 `bookside sample --remove`。
+
+`init` 同时会把书畔装进你电脑上的智能体。
 
 **3. 打开智能体，说一句**
 
 > 用书畔陪我读书
 
-它应该会问你《呐喊》里「铁屋子」那个问题。接着聊，或者换个话题试试："我还没读《阿Q正传》，别剧透，先说说这本书在写什么。"没反应的话，运行 `bookside doctor`，它会告诉你卡在哪、怎么修。
+它会先提一件最值得聊的事，比如一个该再想想的问题，或者一条新划线引出的追问。没反应的话，运行 `bookside doctor`，它会告诉你卡在哪、怎么修。
 
 **4. 在浏览器里看看**
 
@@ -102,19 +111,12 @@ bookside init --sample
 bookside web
 ```
 
-打开 `http://localhost:4317/`，刚才聊的会出现在这里。
+打开 `http://localhost:4317/`：你的读书画像、问题、观点和这一年的划线都在这里。每条旁边有「接着聊」，选好想做的事，可以先在网页上写下你的话，再复制给智能体。
 
-**5. 换成你自己的书**
+## 之后的新划线
 
-```sh
-bookside init             # 选微信读书或 Kindle
-bookside sample --remove  # 不要示例书了
-```
-
-## 接上你的书
-
-- **微信读书**：在 [weread.qq.com/r/weread-skills](https://weread.qq.com/r/weread-skills) 获取 Key，`bookside init` 时选微信读书并填入。之后对智能体说"同步一下微信读书"。Key 只用来读取你自己的书架和划线，保存在本机，仅你本人可读。
-- **Kindle**：把 Kindle 接到电脑，在 `documents` 目录里找到 `My Clippings.txt`，`bookside init` 时选 Kindle 并给出路径。以后再导入同一个文件，只会增加新内容。
+- **微信读书**：读了新的、划了新的，对智能体说"同步一下微信读书"。Key 只用来读取你自己的书架和划线，保存在本机，仅你本人可读。
+- **Kindle**：重新导入同一个 `My Clippings.txt`（对智能体说"导入 Kindle 的新划线"），只会增加新内容。
 
 第一次导入的划线算作"已经读过"，不会一下子冒出几百条追问；之后的新划线才会被追问。
 
@@ -135,8 +137,10 @@ bookside sample --remove  # 不要示例书了
 | 回顾自己划了什么 | "我在这本书里都划了些什么？" |
 | 翻翻旧划线 | "给我几条旧划线" |
 | 检验读懂没有 | "考考我" |
+| 看看自己最近在关心什么 | "我最近都在关心什么？" |
 | 找以前的划线 | "我以前的划线里有没有说到这个的？" |
 | 读完了 | "帮我把这本书整理成观点" |
+| 写书评、读后感 | "用我自己的想法，帮我写篇《活着》的读后感，发豆瓣" |
 | 换读法 | "《明朝那些事儿》按叙事来读" |
 | 换个追问方式 | "用反方辩手的方式跟我聊" |
 | 同步 | "同步一下微信读书" / "导入 Kindle 的新划线" |
@@ -166,18 +170,18 @@ bookside sample --remove  # 不要示例书了
 
 ## 在浏览器里看
 
-`bookside web` 打开一个只能看的页面：首页是"下次聊书可以从哪里开始"、你正在想的问题、最近的观点和最近在读的书；每本书有导读、问题、观点，以及按章排列的划线和想法。每条旁边有「接着聊」，点一下复制一句话，贴给智能体就能从那里接着聊。
+`bookside web` 打开一个只能看的页面：首页是你的读书画像——一句值得重读的话、你最近在关心的几件事、阅读偏好和这一年的划线，还有"下次聊书可以从哪里开始"、正在想的问题和最近的观点；每本书有导读、问题、观点，以及按章排列的划线和想法。每条旁边有「接着聊」，点一下复制一句话，贴给智能体就能从那里接着聊。
 
 | 首页 | 书页 |
 | --- | --- |
-| ![首页：下次聊书可以从这里开始、正在想的问题、最近的观点、最近在读](docs/images/overview.png) | ![书页：读法、AI 导读、追问、问题、观点和按章排列的划线](docs/images/book.png) |
+| ![首页：一句值得重读的话、下次聊书从哪里开始、你最近在关心什么、阅读偏好雷达图、读书画像、这一年的划线](docs/images/overview.png) | ![书页：读法、读前目的、AI 速览、带着读的追问、问题和按章排列的划线](docs/images/book.png) |
 
-默认只有你这台电脑能打开。想在同一网络的手机上看，用 `bookside web --host`（同一网络里的人都能看到，只能看、不能改）。
+默认只有你这台电脑能打开。想在手机上看，用 `bookside web --host`，手机扫一下终端或页脚「在手机上看」里的二维码（同一网络里的人都能看到，只能看、不能改）。
 
 ## 隐私与数据
 
 - **全部内容在你电脑上**：`~/.bookside/bookside.db`（一个 SQLite 文件），配置在 `~/.bookside/config.json`。想换位置，设置环境变量 `BOOKSIDE_HOME`。
-- **随时带走**：`bookside export` 导出成 Obsidian 可以直接打开的 Markdown，每本书、每个问题一个文件，双链互相连着，点链接能跳到那条划线。
+- **随时带走**：`bookside export` 导出成 Obsidian 可以直接打开的 Markdown，每本书、每个问题一个文件，双链互相连着，点链接能跳到那条划线。加上 `--auto`，之后每次同步都会自动更新。
 - **不收集任何数据**：没有遥测，没有账号。书畔自己不调用模型，只连微信读书：读取你自己的书架、划线和想法，写导读时取书的目录、简介和热门划线；查看器里的封面图也来自微信读书。只用 Kindle 或示例书时，它完全不联网。
 
 ## 常见问题
@@ -215,7 +219,7 @@ pnpm install
 pnpm test        # 测试
 pnpm typecheck   # 类型检查
 pnpm build       # 打出 npm 包，在 packages/bookside
-ln -s "$PWD/packages/cli/src/main.ts" ~/.local/bin/bookside   # 直接从源码运行（任一在 PATH 上的目录）
+ln -s "$PWD/packages/cli/src/main.ts" ~/.local/bin/bookside   # 直接从源码运行（需要 Node 24；任一在 PATH 上的目录）
 ```
 
 ## 许可证

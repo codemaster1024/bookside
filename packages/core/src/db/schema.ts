@@ -180,6 +180,21 @@ export const questions = sqliteTable(
   ],
 );
 
+/** 问题状态的每一次改动：看一个问题从提出到想通走过的路。 */
+export const questionStatusChanges = sqliteTable(
+  "question_status_changes",
+  {
+    id: id(),
+    questionId: text("question_id")
+      .notNull()
+      .references(() => questions.id, { onDelete: "cascade" }),
+    from: text("from", { enum: QUESTION_STATUSES }).notNull(),
+    to: text("to", { enum: QUESTION_STATUSES }).notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("question_status_changes_question").on(t.questionId, t.createdAt)],
+);
+
 export const probes = sqliteTable(
   "probes",
   {
@@ -360,3 +375,18 @@ export const syncState = sqliteTable("sync_state", {
   value: text("value").notNull(),
 });
 
+
+/**
+ * 读书画像：智能体根据读者的划线写的一页总结——一句值得重读的话、最近在关心的几件事、一段画像和一条建议。
+ * 只追加不覆盖，首页显示最新的一份。
+ */
+export const portraits = sqliteTable("portraits", {
+  id: id(),
+  /** JSON：{ reread, themes, essay, next }，引用的划线与问题都存完整 id。 */
+  content: text("content").notNull(),
+  /** 写的时候一共有多少条划线。 */
+  highlightCount: integer("highlight_count").notNull(),
+  /** 写画像的智能体，如 claude-code；可空。 */
+  model: text("model"),
+  createdAt: createdAt(),
+});

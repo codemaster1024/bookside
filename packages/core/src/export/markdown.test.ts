@@ -8,6 +8,7 @@ import { createInsight, reviseInsight } from "../domain/insights.ts";
 import { confirmLink, proposeLink } from "../domain/links.ts";
 import { appendMessage, createQuestion, setQuestionStatus } from "../domain/questions.ts";
 import { shortId } from "../domain/ids.ts";
+import { writePortrait } from "../ai/portrait.ts";
 import { EXPORT_MARKER, buildExport, writeExport } from "./markdown.ts";
 
 function sample() {
@@ -24,6 +25,18 @@ function sample() {
 }
 
 describe("buildExport", () => {
+  it("records when a question changed status, and exports reading portraits", () => {
+    const { db, q, highlightId, bookId } = sample();
+    expect(buildExport(db).get("questions/作者在偷换哪个概念？.md")).toMatch(/- \d{4}-\d{2}-\d{2}：探讨中 → 已解决/);
+    for (let i = 0; i < 20; i++) db.insert(highlights).values({ bookId, source: "weread", text: `h${i}`, markedAt: T0 }).run();
+    const ref = `h:${shortId(highlightId)}`;
+    writePortrait(db, JSON.stringify({ reread: { highlight: ref, why: "因为" }, themes: [{ title: "主题", gist: "", highlights: [ref] }], portrait: "画像", next: { text: "下一步", question: `q:${shortId(q.id)}` } }));
+    const files = buildExport(db);
+    expect(files.get("读书画像.md")).toContain("**值得重读的一句**");
+    expect(files.get("读书画像.md")).toContain(`[[《书》#^h-${shortId(highlightId)}`);
+    expect(files.get("书畔.md")).toContain("读书画像 1 份（[[读书画像]]）");
+  });
+
   it("writes one file per book and per question, plus an index and an insight list named to avoid clashes in a vault", () => {
     const { db } = sample();
     expect([...buildExport(db).keys()].sort()).toEqual(["books/《书》.md", "questions/作者在偷换哪个概念？.md", "书畔.md", "观点.md"]);

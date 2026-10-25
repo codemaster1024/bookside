@@ -1,6 +1,6 @@
 {
   "name": "bookside",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "给你的智能体一份读书记忆：围绕你在微信读书或 Kindle 的划线追问你，记住你想继续想的问题，下次聊书时再问你现在怎么看。",
   "keywords": ["reading", "highlights", "weread", "kindle", "agent-skills", "claude-code", "codex", "微信读书", "读书笔记"],
   "homepage": "https://github.com/codemaster1024/bookside#readme",
@@ -17,7 +17,7 @@
   },
   "files": ["dist", "migrations", "skills"],
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3"

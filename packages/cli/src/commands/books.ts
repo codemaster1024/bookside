@@ -5,6 +5,7 @@ import {
   listBooks,
   listGuides,
   parseReadingMode,
+  draftBrief,
   quizBrief,
   recapBrief,
   readingModeOf,
@@ -101,6 +102,12 @@ export function registerBooks(program: Command): void {
     .command("quiz <book>")
     .description("考考我（给智能体）：用读者的划线、导读和 TA 写下的理解出 3 道题，一次问一道")
     .action((input: string) => emitBrief(quizBrief(getDb(), resolve("book", input))));
+
+  book
+    .command("draft <book>")
+    .description("读后感草稿（给智能体）：用读者自己写下的想法、问题里的发言和观点拼成一篇书评或读后感，AI 只排顺序、写过渡")
+    .option("--for <where>", "发在哪里，如 豆瓣、公众号、朋友圈（决定篇幅和语气）")
+    .action((input: string, opts: { for?: string }) => emitBrief(draftBrief(getDb(), resolve("book", input), { for: opts.for })));
 
   book
     .command("mode <book> <mode>")

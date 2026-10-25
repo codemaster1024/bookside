@@ -50,4 +50,6 @@ export { loadSample, removeSample, sampleBookId } from "./sample/nahan.ts";
 export * from "./domain/reading-mode.ts";
 export * from "./domain/next.ts";
 export { pickRereads, type Reread } from "./domain/reread.ts";
-export { quizBrief, recapBrief } from "./ai/recap.ts";
+export { draftBrief, quizBrief, recapBrief } from "./ai/recap.ts";
+export * from "./domain/stats.ts";
+export { PORTRAIT_MIN_HIGHLIGHTS, type Portrait, type PortraitQuote, latestPortrait, listPortraits, portraitBrief, portraitDue, writePortrait } from "./ai/portrait.ts";

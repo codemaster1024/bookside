@@ -1,11 +1,13 @@
 import { readFileSync } from "node:fs";
 import type { Command } from "commander";
 import { type Conn, importKindle, listTodos, settleTodos, syncWeread } from "@bookside/core";
-import { emit, getDb, perBookLimit, print, weread } from "../context.ts";
+import { emit, getDb, perBookLimit, print, progress, weread } from "../context.ts";
+import { autoExport } from "./export.ts";
 
 /** 导入之后：无事可做的候选直接消化，其余提示交给智能体。 */
 function afterImport(db: Conn): void {
   settleTodos(db, { perBookLimit: perBookLimit() });
+  autoExport(db);
   const todos = listTodos(db, { perBookLimit: perBookLimit() });
   if (todos.length) print(`有 ${todos.length} 项待办留给智能体，运行 bookside todo 查看。`);
 }
@@ -17,7 +19,9 @@ export function registerSync(program: Command): void {
     .option("--full", "不看变化指纹，逐本重新对齐（用于补齐导入，较慢）")
     .action(async (opts: { full?: boolean }) => {
       const db = getDb();
-      const r = await syncWeread(db, weread("同步要读取你的微信读书"), new Date(), { full: opts.full });
+      const source = weread("同步要读取你的微信读书");
+      const p = progress("正在同步微信读书", "读取书架");
+      const r = await syncWeread(db, source, new Date(), { full: opts.full, onProgress: (d, t, title) => p.update(d, t, title) }).finally(() => p.done());
       if (r.baseline) {
         print(`首次导入完成：同步了 ${r.booksSynced} 本书的笔记，已建立基线（这批内容不会触发追问）。`);
       } else {

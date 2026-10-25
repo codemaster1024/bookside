@@ -16,7 +16,7 @@ await build({
   bundle: true,
   platform: "node",
   format: "esm",
-  target: "node24",
+  target: "node22",
   external: ["better-sqlite3"],
   // 打进来的 CommonJS 依赖会用到 require。
   banner: { js: 'import { createRequire as __createRequire } from "node:module"; const require = __createRequire(import.meta.url);' },

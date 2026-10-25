@@ -4,12 +4,14 @@ import type { Conn } from "../domain/conn.ts";
 import { describeOrigin } from "../domain/threads.ts";
 import { refOf } from "./brief.ts";
 import { booksWithCandidates, loadCandidates, markConsidered } from "./candidates.ts";
+import { portraitDue } from "./portrait.ts";
 
 export type Todo = {
-  kind: "probes" | "activation";
-  bookId: string;
-  bookTitle: string;
-  /** 这本书里等着处理的新划线与新想法条数。 */
+  kind: "probes" | "activation" | "portrait";
+  /** 读书画像不属于哪本书，这两项为空。 */
+  bookId?: string;
+  bookTitle?: string;
+  /** 等着处理的新划线与新想法条数。 */
   count: number;
   /** 取材料的命令。 */
   brief: string;
@@ -38,6 +40,9 @@ export function listTodos(db: Conn, opts: { perBookLimit: number }): Todo[] {
     if (!hasOtherQuestions(db, b.id)) continue;
     out.push({ kind: "activation", bookId: b.id, bookTitle: b.title, count: newCount(db, b.id, "activation"), brief: `bookside activate brief ${refOf("book", b.id)}` });
   }
+  // 读书画像放最后：先处理完新划线的追问与激活，画像里才看得到它们。
+  const portrait = portraitDue(db);
+  if (portrait.due) out.push({ kind: "portrait", count: portrait.newHighlights, brief: "bookside portrait --brief" });
   return out;
 }
 

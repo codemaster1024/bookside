@@ -17,25 +17,38 @@ import {
   syncWeread,
   wereadApiKey,
 } from "@bookside/core";
-import { emit, getDb, perBookLimit, print } from "../context.ts";
+import { emit, getDb, perBookLimit, print, progress } from "../context.ts";
 import { type SkillTarget, installSkill, skillTargets } from "../skill.ts";
 
 const KEY_URL = "https://weread.qq.com/r/weread-skills";
-const MIN_NODE = 24;
+const MIN_NODE = 22;
 
 type Source = { kind: "weread"; key: string } | { kind: "kindle"; file: string } | { kind: "sample" };
 
+/** Key 只露出头尾，确认是哪一个就够了。 */
+const maskKey = (key: string) => (key.length > 12 ? `${key.slice(0, 4)}…${key.slice(-4)}` : "…");
+
 async function ask(): Promise<Source> {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
+  const fromEnv = process.env.WEREAD_API_KEY?.trim();
+  const existing = fromEnv || wereadApiKey(loadConfig());
   try {
     print("书畔的数据从哪来？");
-    print(`  1) 微信读书（需要 Key，在 ${KEY_URL} 获取）`);
+    print(`  1) 微信读书${existing ? `（已找到 Key ${maskKey(existing)}）` : `（需要 Key，在 ${KEY_URL} 获取）`}`);
     print("  2) Kindle 的 My Clippings.txt（Kindle 接电脑后在 documents 目录里）");
-    print("  3) 先用示例书鲁迅《呐喊》试试");
-    const choice = (await rl.question("选择 [3]：")).trim() || "3";
+    print("  3) 还没准备好？先用示例书鲁迅《呐喊》看看");
+    const choice = (await rl.question("选择 [1]：")).trim() || "1";
     if (choice === "1") {
+      if (existing) {
+        const where = fromEnv ? "环境变量 WEREAD_API_KEY 里" : "配置文件里";
+        const reuse = (await rl.question(`用${where}的 Key ${maskKey(existing)}？[Y/n]：`)).trim().toLowerCase();
+        if (reuse === "" || reuse === "y" || reuse === "yes") return { kind: "weread", key: existing };
+        if (fromEnv) print("注意：环境变量 WEREAD_API_KEY 优先于配置文件。换 Key 后，记得把环境变量也改掉或删掉。");
+      } else {
+        print(`获取 Key：用浏览器打开 ${KEY_URL}，登录后复制页面上的 Key（以 wrk- 开头）。`);
+      }
       const key = (await rl.question("粘贴微信读书 Key：")).trim();
-      if (!key) throw new Error("没有 Key");
+      if (!key) throw new Error(`没有填 Key。在 ${KEY_URL} 获取后再运行 bookside init；或者先运行 bookside init --sample 用示例书看看`);
       return { kind: "weread", key };
     }
     if (choice === "2") {
@@ -75,8 +88,9 @@ export function registerSetup(program: Command): void {
         const config = loadConfig();
         config.weread.apiKey = source.key;
         saveConfig(config);
-        print(`已保存微信读书 Key（${configPath()}，仅你本人可读）。正在同步……`);
-        const r = await syncWeread(db, new WereadClient(source.key));
+        print(`已保存微信读书 Key（${configPath()}，仅你本人可读）。`);
+        const p = progress("正在同步微信读书", "读取书架");
+        const r = await syncWeread(db, new WereadClient(source.key), new Date(), { onProgress: (d, t, title) => p.update(d, t, title) }).finally(() => p.done());
         print(`同步了 ${r.booksSynced} 本书的笔记${r.baseline ? "，已建立基线（这批内容不会触发追问，之后的新划线才会）" : ""}。`);
       } else if (source.kind === "kindle") {
         if (!existsSync(source.file)) throw new Error(`找不到 ${source.file}`);
@@ -84,7 +98,8 @@ export function registerSetup(program: Command): void {
         print(`从 Kindle 导入了 ${r.books} 本书：划线 ${r.newHighlights} 条、笔记 ${r.newNotes} 条。以后再导入同一个文件，只会增加新内容。`);
       } else {
         loadSample(db);
-        print("已放入示例书鲁迅《呐喊》：几条划线、一条待处理的追问、一个到了回访时间的问题；读到《故乡》为止，可以试试它会不会剧透。不要了可以 bookside sample --remove。");
+        print("已放入示例书鲁迅《呐喊》：二十来条划线、一条待处理的追问、一个到了回访时间的问题；读到《故乡》为止，可以试试它会不会剧透。和智能体聊书时，它还会替你写一份读书画像。");
+        print("想换成你自己的书：再运行 bookside init，选微信读书或 Kindle；不要示例书了：bookside sample --remove。");
       }
       settleTodos(db, { perBookLimit: perBookLimit() });
 

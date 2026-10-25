@@ -1,5 +1,5 @@
 import { and, asc, eq, gt, isNotNull, lte, sql } from "drizzle-orm";
-import { books, chapters, highlights, insightSources, messageHighlights, messages, questions } from "../db/schema.ts";
+import { books, chapters, highlights, insightSources, messageHighlights, messages, questionStatusChanges, questions } from "../db/schema.ts";
 import type { QuestionStatus, Speaker } from "../db/schema.ts";
 import type { Conn } from "./conn.ts";
 import { DomainError, notFound } from "./errors.ts";
@@ -85,6 +85,7 @@ export function appendMessage(conn: Conn, questionId: string, input: NewMessage,
         })
         .where(eq(questions.id, questionId))
         .run();
+      if (status !== q.status) tx.insert(questionStatusChanges).values({ questionId, from: q.status, to: status, createdAt: now }).run();
     }
     return message;
   });
@@ -118,6 +119,7 @@ export function setQuestionStatus(conn: Conn, questionId: string, status: Questi
       .set({ status, ...schedule })
       .where(eq(questions.id, questionId))
       .run();
+    if (q.status !== status) tx.insert(questionStatusChanges).values({ questionId, from: q.status, to: status, createdAt: now }).run();
     return getQuestion(tx, questionId);
   });
 }
@@ -166,4 +168,11 @@ export function upcomingRevisits(conn: Conn, days = 7, now = new Date()): Questi
     .where(and(gt(questions.nextRevisitAt, now), lte(questions.nextRevisitAt, until)))
     .orderBy(asc(questions.nextRevisitAt))
     .all();
+}
+
+export type StatusChange = typeof questionStatusChanges.$inferSelect;
+
+/** 这个问题的状态改动，早的在前。 */
+export function statusChanges(conn: Conn, questionId: string): StatusChange[] {
+  return conn.select().from(questionStatusChanges).where(eq(questionStatusChanges.questionId, questionId)).orderBy(asc(questionStatusChanges.createdAt)).all();
 }

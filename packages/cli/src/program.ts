@@ -6,6 +6,7 @@ import { registerGuide } from "./commands/guide.ts";
 import { registerInsights } from "./commands/insights.ts";
 import { registerLinks } from "./commands/links.ts";
 import { registerNext } from "./commands/next.ts";
+import { registerPortrait } from "./commands/portrait.ts";
 import { registerProbes } from "./commands/probes.ts";
 import { registerQuestions } from "./commands/questions.ts";
 import { registerSetup } from "./commands/setup.ts";
@@ -34,6 +35,7 @@ export function buildProgram(): Command {
   registerInsights(program);
   registerLinks(program);
   registerGuide(program);
+  registerPortrait(program);
   registerExport(program);
   registerExtra(program);
   registerWeb(program);

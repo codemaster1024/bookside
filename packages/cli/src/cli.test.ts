@@ -1,4 +1,4 @@
-import { mkdtempSync } from "node:fs";
+import { existsSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { databasePath, openDb, schema } from "@bookside/core";
@@ -90,5 +90,20 @@ describe("bookside CLI", () => {
 
   it("requires exactly one probe target", async () => {
     await expect(run("probes", "add", "--book", bookId, "--highlight", highlightId, "x")).rejects.toThrow(/恰好给一个/);
+  });
+});
+
+describe("auto export", () => {
+  it("remembers the folder and refreshes it when the agent opens a session, until turned off", async () => {
+    const dir = join(mkdtempSync(join(tmpdir(), "bookside-auto-")), "vault");
+    expect(await run("export", dir, "--auto")).toContain("自动更新这里");
+    await run("q", "new", "自动导出之后才记下的问题");
+    expect(existsSync(join(dir, "questions", "自动导出之后才记下的问题.md"))).toBe(false);
+    await run("todo");
+    expect(existsSync(join(dir, "questions", "自动导出之后才记下的问题.md"))).toBe(true);
+    expect(await run("export", "--auto-off")).toContain("已关闭自动导出");
+    await run("q", "new", "关掉之后的问题");
+    await run("todo");
+    expect(existsSync(join(dir, "questions", "关掉之后的问题.md"))).toBe(false);
   });
 });

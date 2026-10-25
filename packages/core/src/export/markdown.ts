@@ -14,7 +14,8 @@ import type { Conn } from "../domain/conn.ts";
 import { shortId } from "../domain/ids.ts";
 import { type InsightView, type InsightWithSources, listInsights } from "../domain/insights.ts";
 import type { Link } from "../domain/links.ts";
-import type { Question } from "../domain/questions.ts";
+import { type Question, statusChanges } from "../domain/questions.ts";
+import { listPortraits } from "../ai/portrait.ts";
 import {
   LINK_KIND_LABELS,
   QUESTION_STATUS_LABELS,
@@ -29,8 +30,9 @@ export const EXPORT_MARKER = ".bookside-export";
 /** 总览与观点总表的文件名（不用 README.md，免得和库里别的文件重名）。 */
 const INDEX = "书畔";
 const INSIGHTS = "观点";
+const PORTRAITS = "读书画像";
 /** 每次导出会整体重写的子目录与文件。 */
-const OWNED = ["books", "questions", `${INDEX}.md`, `${INSIGHTS}.md`];
+const OWNED = ["books", "questions", `${INDEX}.md`, `${INSIGHTS}.md`, `${PORTRAITS}.md`];
 
 export type ExportFiles = Map<string, string>;
 
@@ -209,7 +211,7 @@ export function buildExport(db: Conn, now = new Date()): ExportFiles {
   // —— 问题 ——
   for (const q of questions) {
     const d = details.get(q.id)!;
-    files.set(`questions/${questionFile.get(q.id)}.md`, renderQuestion(d, linkTo, renderLinks, renderInsight));
+    files.set(`questions/${questionFile.get(q.id)}.md`, renderQuestion(d, linkTo, renderLinks, renderInsight, statusChanges(db, q.id)));
   }
 
   // —— 观点总表 ——
@@ -227,12 +229,30 @@ export function buildExport(db: Conn, now = new Date()): ExportFiles {
   }
   files.set(`${INSIGHTS}.md`, insightLines.join("\n"));
 
+  // —— 读书画像 ——
+  const portraits = listPortraits(db);
+  if (portraits.length) {
+    const p = [frontmatter({ tags: ["bookside/portraits"] }), `# ${PORTRAITS}`, "", "智能体根据你的划线写的读书画像，新的在前。引用的每一句都是你划过的原文。", ""];
+    for (const x of portraits) {
+      p.push(`## ${day(x.createdAt)}`, "", `根据 ${x.highlightCount} 条划线${x.model ? `，${x.model} 写` : ""}。`, "");
+      if (x.change) p.push(`**这段时间的变化**：${x.change}`, "");
+      if (x.reread) p.push("**值得重读的一句**", "", quoteBlock(x.reread.text), "", `——${linkTo("highlight", x.reread.highlightId)}`, "", x.reread.why, "");
+      p.push("**你最近在关心什么**", "");
+      for (const t of x.themes) {
+        p.push(`- ${t.title}${t.gist ? `：${t.gist}` : ""}`);
+        for (const q of t.quotes) p.push(`  - ${linkTo("highlight", q.highlightId)}`);
+      }
+      p.push("", "**你的读书画像**", "", x.essay, "", `**下一步可以**：${x.next.text}`, "");
+    }
+    files.set(`${PORTRAITS}.md`, p.join("\n"));
+  }
+
   // —— 总览 ——
   const readme = [
     frontmatter({ tags: ["bookside/index"], exported: `${day(now)} ${pad(now.getHours())}:${pad(now.getMinutes())}` }),
     "# 书畔",
     "",
-    `导出于 ${day(now)} ${pad(now.getHours())}:${pad(now.getMinutes())}。书 ${books.length} 本，问题 ${questions.length} 个，观点 ${insights.length} 条（${wiki(INSIGHTS, "全部观点")}）。`,
+    `导出于 ${day(now)} ${pad(now.getHours())}:${pad(now.getMinutes())}。书 ${books.length} 本，问题 ${questions.length} 个，观点 ${insights.length} 条（${wiki(INSIGHTS, "全部观点")}）${portraits.length ? `，读书画像 ${portraits.length} 份（${wiki(PORTRAITS)}）` : ""}。`,
     "",
     "线程中的「我」是你的原话，「AI」是 AI 的回应；观点标注「我写的」或「AI 协助」。",
     "",
@@ -260,6 +280,7 @@ function renderQuestion(
   linkTo: (type: string, id: string) => string,
   renderLinks: (links: Link[], self: { type: string; id: string }) => string[],
   renderInsight: (i: InsightView, heading: string) => string[],
+  changes: { from: QuestionStatus; to: QuestionStatus; createdAt: Date }[],
 ): string {
   const q: Question = d.question;
   const origin = d.origin
@@ -284,6 +305,7 @@ function renderQuestion(
     `- 状态：${QUESTION_STATUS_LABELS[q.status]}`,
     `- 起源：${origin}`,
     `- 创建：${day(q.createdAt)}${q.nextRevisitAt ? ` · 下次回访：${day(q.nextRevisitAt)}` : ""}`,
+    ...changes.map((c) => `- ${day(c.createdAt)}：${QUESTION_STATUS_LABELS[c.from]} → ${QUESTION_STATUS_LABELS[c.to]}`),
     "",
     "## 线程",
     "",

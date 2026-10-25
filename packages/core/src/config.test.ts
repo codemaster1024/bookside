@@ -8,7 +8,7 @@ const tmp = () => join(mkdtempSync(join(tmpdir(), "bookside-")), "config.json");
 
 describe("config", () => {
   it("defaults when the file is missing", () => {
-    expect(loadConfig(tmp())).toEqual({ probes: { perBookLimit: 3 }, weread: {} });
+    expect(loadConfig(tmp())).toEqual({ probes: { perBookLimit: 3 }, weread: {}, export: {} });
   });
 
   it("round-trips and keeps the file private", () => {
@@ -18,7 +18,7 @@ describe("config", () => {
     config.probes.perBookLimit = 5;
     saveConfig(config, path);
     expect(statSync(path).mode & 0o777).toBe(0o600);
-    expect(loadConfig(path)).toEqual({ probes: { perBookLimit: 5 }, weread: { apiKey: "wrk-test" } });
+    expect(loadConfig(path)).toEqual({ probes: { perBookLimit: 5 }, weread: { apiKey: "wrk-test" }, export: {} });
   });
 
   it("explains what is wrong with an invalid file", () => {

@@ -6,6 +6,8 @@ import { booksideHome } from "./paths.ts";
 const Config = z.object({
   probes: z.object({ perBookLimit: z.int().min(0).default(3) }).prefault({}),
   weread: z.object({ apiKey: z.string().optional() }).prefault({}),
+  /** 设了 autoDir 时，每次同步、导入和开场取待办之后都自动导出到这里。 */
+  export: z.object({ autoDir: z.string().optional() }).prefault({}),
 });
 export type Config = z.infer<typeof Config>;
 

@@ -103,6 +103,29 @@ export function printErr(...parts: unknown[]): void {
   else process.stderr.write(line);
 }
 
+/**
+ * 终端里的进度：先显示「标签：第一步……」，之后在同一行刷新「标签 12/147 本《书名》」，结束时擦掉。
+ * 不在终端里（智能体运行、测试）时什么也不写，免得刷屏。
+ */
+export function progress(label: string, first: string): { update(done: number, total: number, title?: string): void; done(): void } {
+  const tty = !session.getStore() && process.stderr.isTTY;
+  let last = 0;
+  const line = (text: string) => process.stderr.write(`\r\x1b[K${text}`);
+  if (tty) line(`${label}：${first}……`);
+  return {
+    update(done, total, title) {
+      const now = Date.now();
+      if (!tty || total === 0 || (done < total && now - last < 80)) return;
+      last = now;
+      const name = title ? ` 《${title.length > 20 ? `${title.slice(0, 20)}…` : title}》` : "";
+      line(`${label} ${done}/${total} 本${name}`);
+    },
+    done() {
+      if (tty) line("");
+    },
+  };
+}
+
 /** 原样写出（commander 的帮助文本等）。 */
 export function writeOut(text: string): void {
   const s = session.getStore();

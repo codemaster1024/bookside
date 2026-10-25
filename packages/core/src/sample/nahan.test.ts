@@ -16,13 +16,13 @@ beforeEach(() => {
 });
 
 describe("sample book", () => {
-  it("shows the whole loop at once: a pending probe and a question due for revisit, with no agent todos", () => {
+  it("shows the whole loop at once: a pending probe, a question due for revisit, and enough highlights for a reading portrait", () => {
     const { bookId, created } = loadSample(db);
     expect(created).toBe(true);
-    expect(db.select().from(highlights).all()).toHaveLength(5);
+    expect(db.select().from(highlights).all()).toHaveLength(22);
     expect(pendingProbes(db, { bookId })).toHaveLength(1);
     expect(dueRevisits(db).map((q) => q.title)).toEqual(["铁屋子里先醒来的人，该不该叫醒别人？"]);
-    expect(listTodos(db, { perBookLimit: 3 })).toEqual([]);
+    expect(listTodos(db, { perBookLimit: 3 }).map((t) => t.kind)).toEqual(["portrait"]);
     expect(loadSample(db)).toEqual({ bookId, created: false });
     expect(pickRereads(db, { count: 2 })).toHaveLength(2);
   });

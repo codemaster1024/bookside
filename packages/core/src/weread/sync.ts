@@ -43,7 +43,7 @@ export async function syncWeread(
   db: Conn,
   source: WereadSource,
   now = new Date(),
-  opts: { full?: boolean; onProgress?: (done: number, total: number) => void } = {},
+  opts: { full?: boolean; onProgress?: (done: number, total: number, title?: string) => void } = {},
 ): Promise<SyncResult> {
   const [shelf, notebooks] = await Promise.all([source.shelf(), source.notebooks()]);
   const baseline = !db.select().from(syncState).where(eq(syncState.key, BASELINE_KEY)).get();
@@ -85,7 +85,7 @@ export async function syncWeread(
       return applied;
     });
     result.booksSynced++;
-    opts.onProgress?.(result.booksSynced, todo.length);
+    opts.onProgress?.(result.booksSynced, todo.length, db.select({ title: books.title }).from(books).where(eq(books.id, bookId)).get()?.title);
     result.markedDeleted += r.markedDeleted;
     if (!baseline) result.newReviews += r.newReviews;
     if (!baseline) {

@@ -12,6 +12,7 @@
   "dependencies": {
     "@bookside/core": "workspace:*",
     "@bookside/web": "workspace:*",
-    "commander": "^15.0.0"
+    "commander": "^15.0.0",
+    "uqr": "0.1.3"
   }
 }

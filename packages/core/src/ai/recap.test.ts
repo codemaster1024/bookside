@@ -3,7 +3,8 @@ import { books, highlights, notes } from "../db/schema.ts";
 import { T0, seed } from "../domain/fixtures.test-helper.ts";
 import { pickRereads } from "../domain/reread.ts";
 import { refOf } from "./brief.ts";
-import { quizBrief, recapBrief } from "./recap.ts";
+import { draftBrief, quizBrief, recapBrief } from "./recap.ts";
+import { appendMessage, createQuestion } from "../domain/questions.ts";
 
 const DAY = 86_400_000;
 
@@ -22,6 +23,20 @@ describe("recap and quiz", () => {
     const b = quizBrief(db, bookId);
     expect(b.instructions).toContain("一次只问一道");
     expect(b.instructions).toContain(`bookside insight new --as me --book ${refOf("book", bookId)} -`);
+  });
+
+  it("drafts a piece from the reader's own words, named for the kind of book", () => {
+    const { db, bookId } = seed();
+    const q = createQuestion(db, { title: "概念被偷换了吗", origin: { type: "book", id: bookId } });
+    appendMessage(db, q.id, { speaker: "me", content: "我觉得作者把两件事混在一起说了" });
+    const b = draftBrief(db, bookId, { for: "豆瓣" });
+    expect(b.task).toBe("用读者自己的话起草一篇《书》的书评");
+    expect(b.instructions).toContain("发在豆瓣");
+    expect(b.instructions).toContain("【这里你怎么看？】");
+    expect(b.material).toContain(`[${refOf("question", q.id)}] 关于「概念被偷换了吗」，读者说：我觉得作者把两件事混在一起说了`);
+    const bare = db.insert(books).values({ source: "local", title: "没写过想法的书" }).returning().get().id;
+    db.insert(highlights).values({ bookId: bare, source: "local", text: "只有划线", markedAt: T0 }).run();
+    expect(() => draftBrief(db, bare)).toThrow(/还没写下自己的想法/);
   });
 
   it("refuses books with nothing to work from", () => {

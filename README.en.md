@@ -8,10 +8,11 @@
 <p align="center"><a href="README.md">简体中文</a> · <b>English</b></p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/bookside"><img alt="npm" src="https://img.shields.io/npm/v/bookside?color=111&label=npm"></a>
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-111"></a>
-  <a href="https://nodejs.org"><img alt="Node.js 24+" src="https://img.shields.io/badge/node-%E2%89%A5%2024-111"></a>
-  <a href="https://agentskills.io"><img alt="Agent Skills: Claude Code, Codex" src="https://img.shields.io/badge/Agent%20Skills-Claude%20Code%20%C2%B7%20Codex-111"></a>
+  <a href="https://www.npmjs.com/package/bookside"><img alt="npm" src="https://img.shields.io/npm/v/bookside?color=cb3837&logo=npm&label=npm"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-2ea44f"></a>
+  <a href="https://nodejs.org"><img alt="Node.js 22+" src="https://img.shields.io/badge/node-%E2%89%A5%2022-5fa04e?logo=nodedotjs&logoColor=white"></a>
+  <a href="https://agentskills.io"><img alt="Agent Skills: Claude Code, Codex" src="https://img.shields.io/badge/Agent%20Skills-Claude%20Code%20%C2%B7%20Codex-d97757?logo=claude&logoColor=white"></a>
+  <a href="https://github.com/codemaster1024/bookside/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/codemaster1024/bookside?style=flat&color=e3b341&logo=github"></a>
 </p>
 
 <p align="center">
@@ -41,9 +42,10 @@ Bookside makes your agent **remember what you are thinking about**, and pick it 
 
 - **Understand first, then think it through.** A one-minute overview helps you decide whether to read a book and where to start; full and chapter guides lay out the structure and key ideas — for Kindle books too.
 - **Questions, not just summaries.** New highlights get a question: do you agree? what does it remind you of? It asks about you, not about the book.
-- **Remembers what you want to keep thinking about.** Keep a question and it becomes a long-running thread. Your words and the AI's are stored apart; every view you settle on is marked as written by you or AI-assisted.
+- **Remembers what you want to keep thinking about.** Keep a question and it becomes a long-running thread. Your words and the AI's are stored apart; every view you settle on is marked as written by you or AI-assisted. Want to write a review? It drafts one from your own words instead of writing it for you.
 - **Brings things up at the right moment — and never nags.** No notifications, nothing running in the background. When you come to talk about books, it raises just one thing worth talking about.
 - **Highlights that don't sink.** When you feel like it, it brings back a few highlights from a month or more ago and asks how they read now; it can also recap what you cared about in a book, or quiz you on it.
+- **See what you have been reading for.** Once your highlights pile up, your agent writes you a reading portrait: the few things you have been caring about lately, one line worth rereading now, and a next step — every quote is a highlight of yours. Write another a few weeks later and you can see how you have changed.
 - **Connects your books.** When a passage in a new book may answer a question you asked about another, it points it out and waits for you to confirm.
 - **Reads each book the way it wants to be read.** Arguments get challenged, how-to books get "did you try it?", science gets "explain it back", novels get talked about — without spoilers past where you are.
 - **Your data stays yours.** One local file, exportable any time as Markdown that Obsidian opens directly. Bookside itself calls no AI model — your agent does the thinking — so there is no model API key to get, and nothing is collected.
@@ -72,11 +74,12 @@ The conversation goes into the thread of the "iron house" question. Come back in
 | Remembers your questions across weeks and months | | | ✓ |
 | Finds passages in new books that answer old questions | | | ✓ |
 | Adapts to the kind of book, no spoilers in novels | | | ✓ |
+| Shows what you have been caring about lately | | | ✓ |
 | What remains is in your own words | ✓ | | ✓ |
 
 ## Get started in five minutes
 
-You need [Node.js](https://nodejs.org) 24 or later and an agent that loads skills, such as Claude Code, Codex, Cursor or Trae.
+You need [Node.js](https://nodejs.org) 22 or later and an agent that loads skills, such as Claude Code, Codex, Cursor or Trae.
 
 **1. Install**
 
@@ -84,19 +87,25 @@ You need [Node.js](https://nodejs.org) 24 or later and an agent that loads skill
 npm install -g bookside
 ```
 
-**2. Try the sample book first** (no account or key needed)
+**2. Bring in your books**
 
 ```sh
-bookside init --sample
+bookside init
 ```
 
-This adds a sample book — Lu Xun's *Call to Arms* (《呐喊》), read up to the story *My Old Home*, with a few highlights, a pending question and one ready to revisit — and installs Bookside into the agents on your machine.
+It asks where your data comes from:
+
+- **WeChat Read**: get a key at [weread.qq.com/r/weread-skills](https://weread.qq.com/r/weread-skills) and paste it in; your shelf and highlights sync over.
+- **Kindle**: give the path to `My Clippings.txt` (in the `documents` folder when your Kindle is connected).
+- **Not ready yet?** Pick the sample book — Lu Xun's *Call to Arms* (《呐喊》), read up to *My Old Home*, with about twenty highlights, a pending question and one ready to revisit — enough for your agent to write a reading portrait. To switch to your own books later, run `bookside init` again; to remove the sample, `bookside sample --remove`.
+
+`init` also installs Bookside into the agents on your computer.
 
 **3. Open your agent and say**
 
-> 用书畔陪我读书
+> 用书畔陪我读书 *(Read with me, Bookside)*
 
-It should ask you about the "iron house". Keep going, or try something else: "I haven't read *The True Story of Ah Q* yet — no spoilers, what is this book about?" If nothing happens, run `bookside doctor`; it tells you what is missing and how to fix it.
+It starts with the one thing most worth talking about — a question ready to revisit, or a question about a new highlight. If nothing happens, run `bookside doctor`; it tells you what is missing and how to fix it.
 
 **4. Have a look in the browser**
 
@@ -104,19 +113,12 @@ It should ask you about the "iron house". Keep going, or try something else: "I 
 bookside web
 ```
 
-Open `http://localhost:4317/` — what you just talked about is there.
+Open `http://localhost:4317/`: your reading portrait, questions, views and a year of highlights are all there. Every item has a 「接着聊」 (*keep talking*) menu — pick what you want to do, write your part on the page if you like, then copy it to your agent.
 
-**5. Switch to your own books**
+## New highlights later
 
-```sh
-bookside init             # choose WeChat Read or Kindle
-bookside sample --remove  # remove the sample book
-```
-
-## Bring in your books
-
-- **WeChat Read**: get a key at [weread.qq.com/r/weread-skills](https://weread.qq.com/r/weread-skills) and enter it when `bookside init` asks. From then on, tell your agent to sync. The key only reads your own shelf and highlights, and is stored locally, readable by you alone.
-- **Kindle**: connect your Kindle, find `My Clippings.txt` in its `documents` folder, and give the path to `bookside init`. Importing the same file again only adds what's new.
+- **WeChat Read**: after reading and highlighting more, tell your agent to sync. The key only reads your own shelf and highlights, and is stored locally, readable by you alone.
+- **Kindle**: import the same `My Clippings.txt` again (tell your agent to import new Kindle highlights); only what's new is added.
 
 Everything in your first import counts as already read, so you won't get hundreds of questions at once — only new highlights get asked about.
 
@@ -137,8 +139,10 @@ No commands to remember — just talk to your agent (in Chinese or English):
 | Recap your highlights | "What did I highlight in this book?" |
 | Revisit old highlights | "Show me a few old highlights" |
 | Test yourself | "Quiz me" |
+| See what you have been caring about | "What have I been caring about lately?" |
 | Search old highlights | "Did I highlight anything about this before?" |
 | Wrap up a book | "Help me turn this book into my own takeaways" |
+| Write a review | "Draft a review of *Brave New World* from my own notes, for my blog" |
 | Change the reading mode | "Read *Sapiens* as a story" |
 | Change the questioning style | "Argue against me like a debater" |
 | Sync | "Sync WeChat Read" / "Import my new Kindle highlights" |
@@ -168,18 +172,18 @@ Not in the mood? Say "don't ask me about this for now" (it comes back in about t
 
 ## In the browser
 
-`bookside web` opens a read-only page: the home page shows where to start next time, the questions you are thinking about, recent views and recent books; each book shows its guide, questions, views and highlights by chapter. Every item has a 「接着聊」 (*keep talking*) button that copies a sentence to paste into your agent.
+`bookside web` opens a read-only page: the home page is your reading portrait — a line worth rereading, the things you have been caring about, your reading preferences and a year of highlights — plus where to start next time, the questions you are thinking about and recent views; each book shows its guide, questions, views and highlights by chapter. Every item has a 「接着聊」 (*keep talking*) button that copies a sentence to paste into your agent.
 
 | Home | Book |
 | --- | --- |
-| ![Home: where to start next time, questions in progress, recent views, recent books](docs/images/overview.png) | ![Book page: reading mode, AI guide, questions, views and highlights by chapter](docs/images/book.png) |
+| ![Home: a line worth rereading, where to start next time, what you have been caring about, reading-preference radar, reading portrait, a year of highlights](docs/images/overview.png) | ![Book page: reading mode, why you are reading it, AI overview, questions to read with, your questions and highlights by chapter](docs/images/book.png) |
 
-Only your computer can open it by default. To read it on your phone on the same network, use `bookside web --host` (anyone on that network can see it — read-only).
+Only your computer can open it by default. To read it on your phone, use `bookside web --host` and scan the QR code in the terminal, or under "在手机上看" (*on your phone*) at the bottom of the page (anyone on that network can see it — read-only).
 
 ## Privacy and data
 
 - **Everything is on your computer**: `~/.bookside/bookside.db` (a single SQLite file) and `~/.bookside/config.json`. Set `BOOKSIDE_HOME` to move it.
-- **Take it with you**: `bookside export` writes Markdown that Obsidian opens directly — one file per book and per question, linked together, with links that jump to the exact highlight.
+- **Take it with you**: `bookside export` writes Markdown that Obsidian opens directly — one file per book and per question, linked together, with links that jump to the exact highlight. Add `--auto` and it updates itself after every sync.
 - **Nothing is collected**: no telemetry, no account. Bookside calls no models and talks only to WeChat Read — to read your own shelf, highlights and notes, and, for guides, a book's table of contents, blurb and popular highlights; cover images in the viewer come from WeChat Read too. With Kindle or the sample book only, it never goes online.
 
 ## FAQ
@@ -217,7 +221,7 @@ pnpm install
 pnpm test        # tests
 pnpm typecheck   # type check
 pnpm build       # build the npm package into packages/bookside
-ln -s "$PWD/packages/cli/src/main.ts" ~/.local/bin/bookside   # run from source (any directory on your PATH)
+ln -s "$PWD/packages/cli/src/main.ts" ~/.local/bin/bookside   # run from source (needs Node 24; any directory on your PATH)
 ```
 
 ## License
