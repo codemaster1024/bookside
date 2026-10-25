@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.db
+*.db-*
+.DS_Store
+CONTEXT.md
+docs/*
+!docs/images/
+design/
+notes/
+packages/bookside/*
+!packages/bookside/package.json

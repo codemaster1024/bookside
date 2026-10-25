@@ -1,0 +1,21 @@
+{
+  "name": "bookside-workspace",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "bookside": "pnpm --filter @bookside/cli start",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "esbuild": "0.28.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.4"
+  }
+}

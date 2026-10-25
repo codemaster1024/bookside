@@ -1,0 +1,17 @@
+{
+  "name": "@bookside/cli",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "bookside": "./src/main.ts"
+  },
+  "scripts": {
+    "start": "node src/main.ts",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@bookside/core": "workspace:*",
+    "@bookside/web": "workspace:*",
+    "commander": "^15.0.0"
+  }
+}

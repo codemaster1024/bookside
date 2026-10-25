@@ -1,0 +1,16 @@
+{
+  "name": "@bookside/web",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./server": "./src/server/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@bookside/core": "workspace:*",
+    "@hono/node-server": "^2.1.5",
+    "hono": "^4.13.13"
+  }
+}
